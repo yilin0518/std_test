@@ -23,12 +23,12 @@ fn test_true_ValidNum() {
 }
 
 fn test_false_ValidNum() {
-    let arr = [u32::MAX, 2, 3]; // ValidNum
+    let arr = [1u32, 2, 3]; // ValidNum
     let p: *const u8 = arr.as_ptr().cast();
-    let count: usize = 0;
+    let count: usize = usize::MAX;
     let p2 = unsafe { p.byte_add(count) };
     let p2_u32 = unsafe { p2.cast::<u32>() };
-    let _ = unsafe { *p2_u32 + 1 }; // Out of Bounds
+    let _ = unsafe { *p2_u32 }; // Out of Bounds
 }
 
 fn main() {

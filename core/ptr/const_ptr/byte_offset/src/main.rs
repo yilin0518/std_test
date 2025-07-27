@@ -23,17 +23,17 @@ fn test_true_ValidNum() {
 }
 
 fn test_false_ValidNum() {
-    let arr = [u32::MAX, 2, 3]; // ValidNum
+    let arr = [1u32, 2, 3]; // ValidNum
     let p: *const u8 = arr.as_ptr().cast();
-    let count: isize = 0;
+    let count: isize = i64::MAX as isize; // invalid count
     let p2 = unsafe { p.byte_offset(count) };
     let p2_u32 = unsafe { p2.cast::<u32>() };
-    let _ = unsafe { *p2_u32 + 1 }; // Out of Bounds
+    let _ = unsafe { *p2_u32 }; // undefined behavior
 }
 
 fn main() {
     // test_true_InBounded();
     // test_false_InBounded();
     // test_true_ValidNum();
-    // test_false_ValidNum();
+    test_false_ValidNum();  
 }
