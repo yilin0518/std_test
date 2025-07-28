@@ -79,7 +79,7 @@ println!("{:?}", r1); // Violates exclusive mutability principle
 
 ### False Case Patterns:
 
-#### 4.1 Out of bounds access
+#### 4.1 Out of bounds access (Pointer arithmetic)
 
 ```rust
 let arr = [1u32, 2, 3];
@@ -88,19 +88,59 @@ let p2 = unsafe { p.add(5) }; // Out of array bounds
 let _ = unsafe { *p2 }; // UB
 ```
 
+#### 4.2 Out of bounds access (Slice indexing)
+
+```rust
+let arr = [1u32, 2, 3];
+let slice = &arr[..];
+let _element = unsafe { slice.get_unchecked(5) }; // Out of Bounds - undefined behavior
+```
+
+#### 4.3 Out of bounds access (Slice swapping)
+
+```rust
+let mut arr = [1u32, 2, 3];
+let slice = &mut arr[..];
+unsafe { slice.swap_unchecked(1, 5) }; // Out of Bounds - undefined behavior
+```
+
+#### 4.4 Out of bounds access (Slice splitting)
+
+```rust
+let arr = [1u32, 2, 3];
+let slice = &arr[..];
+let _result = unsafe { slice.split_at_unchecked(5) }; // Out of Bounds - undefined behavior
+```
+
 ## 5. ValidNum SP
 
 **Meaning**: Each value in the array belongs to valid range
 
 ### False Case Patterns:
 
-#### 5.1 Values out of valid range
+#### 5.1 Values out of valid range (Array content)
 
 ```rust
-let arr = [u32::MAX, 2, 3]; // Contains values InBound
+let arr = [1u32, 2, 3]; // Contains values InBound
 let p: *const u32 = arr.as_ptr();
-let p2 = unsafe { p.add(0) };
-let _ = unsafe { *p2 + 1 }; // Reading value out of range
+let p2 = unsafe { p.add(usize::MAX) }; // Adding out of range, UB
+let _ = unsafe { *p2 }; // invalid read
+```
+
+#### 5.2 Invalid chunk size (Zero)
+
+```rust
+let arr = [1u32, 2, 3, 4, 5];
+let slice = &arr[..];
+let _chunks = unsafe { slice.as_chunks_unchecked::<0>() }; // Invalid chunk size - zero
+```
+
+#### 5.3 Invalid chunk size (Not divisible)
+
+```rust
+let arr = [1u32, 2, 3, 4, 5];
+let slice = &arr[..];
+let _chunks = unsafe { slice.as_chunks_unchecked::<3>() }; // Invalid chunk size - slice length not divisible by 3
 ```
 
 ## 6. Aligned SP

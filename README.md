@@ -9,3 +9,4 @@
 记录到的API。
 
 1. core::ptr::const_ptr::byte_offset，由于其参数为isize，无法构造出超出范围的参数。对应的false case实际上对应的是out-of-bound case
+2. core::slice::split_at_unchecked 和core::slice::split_at_mut_unchecked的safety与另外一个API关联，目前没有找到，但是Aligned这个SP可能不需要
