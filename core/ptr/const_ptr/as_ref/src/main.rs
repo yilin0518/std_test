@@ -1,3 +1,24 @@
+fn case_as_ref1<T: Clone, 'a>(input: *const T, path: u32, val: T, offset: isize) -> Option<&'a T> {
+    match path {
+        0 => {
+            unsafe { input.as_ref() } 
+        }
+        1 => {
+            let misaligned_ptr = unsafe { (input as *const u8).offset(offset) as *const T };
+            unsafe { misaligned_ptr.as_ref() } // Misaligned
+        }
+        2 => {
+            unsafe {
+                let mut x = (*input).clone();
+                let ptr = &x as *const T;
+                let ref_val = ptr.as_ref();
+                x = val.clone();
+                ref_val // Alias
+            }
+        }
+        _ => None,
+    }
+}
 fn test_true_Null() {
     let p: *const u32 = std::ptr::null();
     let r = unsafe { p.as_ref() };
@@ -32,18 +53,20 @@ fn test_false_ValidPtr2Ref_Align() {
 
 fn test_false_ValidPtr2Ref_Alias() {
     let mut x = 42u32;
-    let mut p: *mut u32 = &mut x as *mut u32;
-    let r1 = unsafe { p.as_ref().unwrap() };
-    // Alias(p, 0) violated - creating multiple aliases to same data
-    // This violates Rust's exclusive mutability principle
-    unsafe { *p = 43; }
-    println!("{:?}", r1);
+    unsafe {
+        let const_ptr: *const u32 = &x as *const u32;
+        let mut p: *mut u32 = &mut x as *mut u32;
+        let r1 = const_ptr.as_ref().unwrap();
+        // Alias(p, 0) violated - creating multiple aliases to same data
+        // This violates Rust's exclusive mutability principle
+        *p = 42;
+        // Just write the same value will cause undefined behavior
+        println!("{:?}", r1);
+    }
 }
 
 fn main() {
-    // test_true_Null();
-    // test_true_ValidPtr2Ref();
-    // test_false_ValidPtr2Ref_Init();
-    // test_false_ValidPtr2Ref_Align();
-    // test_false_ValidPtr2Ref_Alias();
+    let x = &42i32 as *const i32;
+    let r = case_as_ref1(x, 1, 42, 4);
+    println!("{:?}", r);
 }

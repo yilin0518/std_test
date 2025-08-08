@@ -1,5 +1,29 @@
 #![feature(ptr_as_uninit)]
+use std::mem::MaybeUninit;
 
+fn case_as_uninit_ref1<T: Clone>(input: T, path: u32, val: T, offset: isize) -> Option<&'static MaybeUninit<T>> {
+    match path {
+        0 => {
+            let ptr = &input as *const T;
+            unsafe { ptr.as_uninit_ref() } 
+        }
+        1 => {
+            let ptr = &input as *const T;
+            let misaligned_ptr = unsafe { (ptr as *const u8).offset(offset) as *const T };
+            unsafe { misaligned_ptr.as_uninit_ref() } // Misaligned
+        }
+        2 => {
+            unsafe {
+                let mut x = input.clone();
+                let ptr = &x as *const T;
+                let ref_val = ptr.as_uninit_ref();
+                x = val.clone();
+                ref_val // Alias
+            }
+        }
+        _ => None,
+    }
+}
 fn test_true_Null() -> bool {
     let p: *const u32 = std::ptr::null();
     let r = unsafe { p.as_uninit_ref() };
@@ -47,9 +71,7 @@ fn test_false_ValidPtr2Ref_Alias() {
 }
 
 fn main() {
-    // test_true_Null();
-    // test_true_ValidPtr2Ref();
-    // test_false_ValidPtr2Ref_Init();
-    // test_false_ValidPtr2Ref_Align();
-    // test_false_ValidPtr2Ref_Alias();
+    let x = 42u32;
+    let r = case_as_uninit_ref1(x, 2, 42, 4);
+    println!("{:?}", r);
 }

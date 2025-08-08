@@ -1,18 +1,20 @@
-fn test_true_InBounded() {
+fn case_split_at_unchecked1<'a>(input: u32) -> bool {
     let arr = [1u32, 2, 3, 4, 5];
     let slice = &arr[..];
-    let (left, right) = unsafe { slice.split_at_unchecked(2) }; // InBounded
-    assert_eq!(left, &[1, 2]);
-    assert_eq!(right, &[3, 4, 5]);
-}
-
-fn test_false_InBounded() {
-    let arr = [1u32, 2, 3];
-    let slice = &arr[..];
-    let _result = unsafe { slice.split_at_unchecked(5) }; // Out of Bounds - undefined behavior
+    match input {
+        2 => {
+            let (left, right) = unsafe { slice.split_at_unchecked(2) }; // InBounded
+            assert_eq!(left, &[1, 2]);
+            assert_eq!(right, &[3, 4, 5]);
+        }
+        6 => {
+            let _result = unsafe { slice.split_at_unchecked(6) }; // Out of Bounds - undefined behavior
+        }
+        _ => {}
+    };
+    true
 }
 
 fn main() {
-    // test_true_InBounded();
-    // test_false_InBounded();
+    case_split_at_unchecked1(6);
 }

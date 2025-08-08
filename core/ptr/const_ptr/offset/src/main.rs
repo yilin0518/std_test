@@ -1,36 +1,17 @@
-fn test_true_InBounded() {
-    let arr = [1u32, 2, 3, 4, 5];
-    let p: *const u32 = arr.as_ptr();
-    let p2 = unsafe { p.offset(2) }; // InBounded
-    assert_eq!(unsafe { *p2 }, 3);
+fn case_offset1<T>(ptr: *const T, offset: isize) -> *const T { // InBounded
+    unsafe { ptr.offset(offset) }
 }
 
-fn test_false_InBounded() {
-    let arr = [1u32, 2, 3];
-    let p: *const u32 = arr.as_ptr();
-    let p2 = unsafe { p.offset(5) }; // Out of Bounds
-    let _ = unsafe { *p2 }; // undefined behavior
-}
-
-fn test_true_ValidNum() {
-    let arr = [1u32, 2, 3, 4, 5]; // ValidNum
-    let p: *const u32 = arr.as_ptr();
-    let count: isize = 2;
-    let p2 = unsafe { p.offset(count) };
-    assert_eq!(unsafe { *p2 }, 3);
-}
-
-fn test_false_ValidNum() {
-    let arr = [1u32, 2, 3]; // ValidNum
-    let p: *const u32 = arr.as_ptr();
-    let count: isize = isize::MAX; // invalid count
-    let p2 = unsafe { p.offset(count) };
-    let _ = unsafe { *p2 }; // undefined behavior
+fn case_offset2<T>(ptr: *const T, offset: isize) -> *const T { // ValidNum
+    if (offset as usize) * size_of::<T>() < isize::MAX as usize {
+        ptr
+    } else {
+        unsafe { ptr.offset(offset) }
+    }
 }
 
 fn main() {
-    // test_true_InBounded();
-    // test_false_InBounded();
-    // test_true_ValidNum();
-    test_false_ValidNum();
+    let arr = [1u32, 2, 3, 4, 5];
+    let p: *const u32 = arr.as_ptr();
+    let p2 = case_offset2(p, isize::MAX/2);
 }

@@ -1,5 +1,28 @@
 #![feature(ptr_as_ref_unchecked)]
 
+fn case_as_ref_unchecked1<'a, T: Clone>(input: *const T, path: u32, val: T, offset: isize) -> &'a T {
+    match path {
+        0 => {
+            unsafe { input.as_ref_unchecked() } // UnInitialized
+        }
+        1 => {
+            let misaligned_ptr = unsafe { (input as *const u8).offset(offset) as *const T };
+            unsafe { misaligned_ptr.as_ref_unchecked() } // Misaligned
+        }
+        2 => {
+            unsafe {
+                let mut x = (*input).clone();
+                let ptr = &x as *const T;
+                let ref_val = ptr.as_ref_unchecked();
+                x = val.clone();
+                ref_val // Alias
+            }
+        }
+        _ => {
+            unsafe { input.as_ref_unchecked() }
+        }
+    }
+}
 fn test_true_ValidPtr2Ref() {
     let x = 42u32;
     let p: *const u32 = &x;
@@ -37,8 +60,7 @@ fn test_false_ValidPtr2Ref_Alias() {
 }
 
 fn main() {
-    // test_true_ValidPtr2Ref();
-    // test_false_ValidPtr2Ref_Init();
-    // test_false_ValidPtr2Ref_Align();
-    // test_false_ValidPtr2Ref_Alias();
+    let x: *const u32 = std::ptr::null();
+    let r = case_as_ref_unchecked1(x, 0, 42, 4);
+    println!("{:?}", r);
 }

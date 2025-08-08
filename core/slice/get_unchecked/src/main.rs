@@ -1,17 +1,19 @@
-fn test_true_InBounded() {
+fn case_get_unchecked1<'a>(input: u32) -> bool {
     let arr = [1u32, 2, 3, 4, 5];
     let slice = &arr[..];
-    let element = unsafe { slice.get_unchecked(2) }; // InBounded
-    assert_eq!(*element, 3);
-}
-
-fn test_false_InBounded() {
-    let arr = [1u32, 2, 3];
-    let slice = &arr[..];
-    let _element = unsafe { slice.get_unchecked(5) }; // Out of Bounds - undefined behavior
+    match input {
+        2 => {
+            let element = unsafe { slice.get_unchecked(2) }; // InBounded
+            assert_eq!(*element, 3);
+        }
+        5 => {
+            let element = unsafe { slice.get_unchecked(5) }; // Out of Bounds - undefined behavior
+        }
+        _ => {}
+    };
+    true
 }
 
 fn main() {
-   // test_true_InBounded();
-   // test_false_InBounded();
+    case_get_unchecked1(2);
 }
