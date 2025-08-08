@@ -84,6 +84,6 @@ fn case_from_raw2(val: i32) -> bool {
     true
 }
 fn main() {
-    //case_from_raw1(0);  
-    case_from_raw2(2);  
+    case_from_raw1(0);  
+    // case_from_raw2(2);  
 }

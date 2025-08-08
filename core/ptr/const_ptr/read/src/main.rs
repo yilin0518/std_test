@@ -59,7 +59,7 @@ fn case_read2(val: i32) -> bool {
                 a: u8,  // 1B
                 b: u32, // 4B
             }
-            let mut buf = [0u8; 8];
+            let mut buf = [0u8; 9];
             let p = unsafe { buf.as_ptr().add(1) as *const UnalignedStruct };
             // undefined behavior
             let _ = unsafe { core::ptr::read(p) };
@@ -141,8 +141,8 @@ fn case_read4(val: i32) -> bool {
 }
 
 fn main() {
-     let _ = case_read1(0);
-    //let _ = case_read2(3);
+    // let _ = case_read1(0);
+    let _ = case_read2(3);
     //let _ = case_read3(2);
     //let _ = case_read4(1);
 }
