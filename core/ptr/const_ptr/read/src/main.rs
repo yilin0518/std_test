@@ -1,11 +1,20 @@
 #[allow(invalid_null_arguments)]
 fn case_read1(val: i32) -> bool {
     // ValidPtr
-    if val > 0 {
+    if val > 1 {
         let x = val;
         let p: *const i32 = &x;
         let y = unsafe { core::ptr::read(p) };
         assert_eq!(y, val);
+    } else if val == 1 {
+        // Pointer to a box, which will cause double free
+        let x = Box::new(42i32);
+        let x_ptr: *mut Box<i32> = &x as *const Box<i32> as *mut Box<i32>;
+        unsafe {
+            let y = core::ptr::read(x_ptr);
+            println!("y: {}", *y);
+            println!("x: {}", *x);
+        }
     } else if val == 0 {
         // Null
         let p: *const i32 = std::ptr::null();
@@ -141,8 +150,8 @@ fn case_read4(val: i32) -> bool {
 }
 
 fn main() {
-    // let _ = case_read1(0);
-    let _ = case_read2(3);
+    let _ = case_read1(1);
+    // let _ = case_read2(3);
     //let _ = case_read3(2);
     //let _ = case_read4(1);
 }

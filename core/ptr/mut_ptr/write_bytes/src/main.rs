@@ -58,6 +58,14 @@ fn case_write_bytes2(path: u32) -> bool {
                 ptr.write_bytes(0x55, 10); // UB: writing beyond buffer bounds
             }
         }
+        4 => {
+            // ValidPtr violation - Unable to write to a immutable variable
+            let buf = [0u8; 10];
+            let ptr = &buf[0] as *const u8 as *mut u8;
+            unsafe {
+                ptr.write_bytes(0x55, 1); // UB: invalid type
+            }
+        }
         _ => {
             // Default: normal case
             let mut buf = [0u8; 10];
@@ -159,6 +167,6 @@ fn case_write_bytes3(path: u32) -> bool {
 
 fn main() {
     case_write_bytes1(1);
-    case_write_bytes2(0);
+    case_write_bytes2(4);
     case_write_bytes3(3);
 }
